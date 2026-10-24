@@ -1,0 +1,51 @@
+
+@startuml
+!pragma layout smetana
+left to right direction
+
+skinparam backgroundColor white
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam roundcorner 14
+skinparam ArrowColor #425466
+skinparam actorBorderColor #334155
+skinparam rectangleBorderColor #64748B
+skinparam databaseBorderColor #7C3AED
+skinparam wrapWidth 180
+
+title DFD 5 To-Be: склад и закупки
+
+actor "Сотрудник склада" as staff
+actor "Бухгалтерия" as acc
+
+rectangle "P1. Установить роль\nи scope по филиалу" as auth #DCFCE7
+
+rectangle "P2. Вести учёт ТМЦ\nи подтверждать операции" as item #DBEAFE
+
+rectangle "P3. Синхронизировать\nтолько нужные поля" as sync #DCFCE7
+
+database "D1. 1C:Торговля и склад\nограничение ролей, ACL" as store #EDE9FE
+
+database "D2. 1C:Бухгалтерия\nограничение ролей, ACL" as accdb #EDE9FE
+
+database "D3. Лог операций,\nконтроль расхождений" as audit #EDE9FE
+
+staff --> auth : Логин, MFA,\nфилиал, роль
+
+auth --> item : Доступ к складским операциям
+
+item --> store : Закупки, накладные, ТМЦ
+
+store --> sync : Событие движения,\nстоимость
+
+sync --> accdb : Сумма, документ, ID\nбез лишних контактов
+
+acc --> auth : Бухгалтерская роль
+
+accdb --> acc : Финансовые атрибуты
+
+item --> audit : Кто изменил номенклатуру
+
+sync --> audit : Trace_id, исходный документ
+
+@enduml

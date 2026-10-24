@@ -1,0 +1,34 @@
+@startuml
+!pragma layout smetana
+left to right direction
+skinparam backgroundColor white
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam roundcorner 14
+skinparam ArrowColor #425466
+skinparam actorBorderColor #334155
+skinparam rectangleBorderColor #64748B
+skinparam databaseBorderColor #7C3AED
+skinparam wrapWidth 180
+title DFD 4 To-Be: кадры и зарплата
+
+actor "Сотрудник" as emp
+actor "Бухгалтерия\n(кадровый доступ)" as acc
+rectangle "P1. Получить документы\nпо безопасному каналу" as receive #DBEAFE
+rectangle "P2. Проверить IAM\nи роль бухгалтера" as auth #DCFCE7
+rectangle "P3. Обработать\nзарплату в 1C" as salary #DBEAFE
+rectangle "P4. Подготовить отчёт\nс ограничением полей" as report #DCFCE7
+database "D1. Защищённое хранилище\n1C: шифрование/ACL" as db #EDE9FE
+database "D2. Аудит доступа\nи изменений" as audit #EDE9FE
+emp --> receive : Данные для кадрового учёта
+acc --> auth : SSO/MFA + роль кадров/бухгалтерии
+receive --> auth : Запрос записи и допустимая цель
+auth --> salary : Разрешение на операцию
+salary --> db : Данные работников и начислений
+salary --> report : Результат расчёта
+db --> report : Суммы и нужные поля
+report --> acc : Отчёт по разрешённому scope
+salary --> audit : Запись/изменение
+report --> audit : Кто смотрел, когда и зачем
+
+@enduml

@@ -1,0 +1,79 @@
+# Предлагаемая схема; НЕ действующая политика существующей системы.
+version: 1
+assets:
+  - asset_id: patient_registry.phone
+    classification: CONFIDENTIAL
+    domain: PATIENT
+    personal_data: true
+    special_category: null
+    medical_secret: false
+    purpose: [SCHEDULING]
+    owner: reception_lead
+    retention_policy: patient_registry_policy_to_approve
+    residency: RU
+    allowed_roles: [reception]
+    protection: [encrypt_at_rest, tls, mask_in_ui, audit_access]
+    source_asset: legacy/registration_excel
+    lineage_id: FLOW-01
+  - asset_id: appointment.patient_id
+    classification: RESTRICTED
+    domain: PATIENT
+    personal_data: true
+    special_category: null
+    medical_secret: true # факт обращения может раскрывать медицинскую тайну
+    purpose: [SCHEDULING, TREATMENT]
+    owner: medical_director
+    retention_policy: appointment_policy_to_approve
+    residency: RU
+    allowed_roles: [reception, treating_physician]
+    protection: [encrypt_at_rest, tls, scope_by_patient, audit_access]
+    source_asset: legacy/appointments_excel
+    lineage_id: FLOW-01
+  - asset_id: medical_record.diagnosis
+    classification: RESTRICTED
+    domain: MEDICAL
+    personal_data: true
+    special_category: HEALTH
+    medical_secret: true
+    purpose: [TREATMENT]
+    owner: medical_director
+    retention_policy: medical_record_policy_to_approve
+    residency: RU
+    allowed_roles: [treating_physician]
+    protection: [encrypt_at_rest, tls, abac_patient_relation, no_raw_logs, audit_access]
+    source_asset: legacy/shared_drive_medical_scans
+    lineage_id: FLOW-02
+  - asset_id: payment.amount
+    classification: CONFIDENTIAL
+    domain: FINANCE
+    personal_data: true # когда связано с patient_id / order_id
+    special_category: null
+    medical_secret: false # детали медицинской услуги отдельно ограничить
+    purpose: [BILLING]
+    owner: chief_accountant
+    retention_policy: accounting_policy_to_approve
+    residency: RU
+    allowed_roles: [cashier, accountant]
+    protection: [encrypt_at_rest, tls, role_limited_export, audit_access]
+    source_asset: legacy/payment_excel_and_1c
+    lineage_id: FLOW-03
+  - asset_id: employee.salary
+    classification: RESTRICTED
+    domain: HR
+    personal_data: true
+    special_category: null
+    medical_secret: false
+    purpose: [HR_ADMIN]
+    owner: chief_accountant
+    retention_policy: payroll_policy_to_approve
+    residency: RU
+    allowed_roles: [payroll_accountant]
+    protection: [encrypt_at_rest, restricted_access, audit_access]
+    source_asset: legacy/accounting_1c
+    lineage_id: FLOW-04
+policy_defaults:
+  unclassified_medical_asset: deny
+  access_rule: "allow only if role AND purpose AND object_scope AND legal_basis are satisfied"
+  tag_downgrade: requires_owner_and_privacy_review
+  export_to_external_ai: deny_by_default
+  production_to_dev_copy: deny_unless_approved_and_deidentified

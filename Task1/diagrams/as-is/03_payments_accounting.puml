@@ -1,0 +1,36 @@
+@startuml
+!pragma layout smetana
+left to right direction
+skinparam backgroundColor white
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam roundcorner 14
+skinparam ArrowColor #425466
+skinparam actorBorderColor #334155
+skinparam rectangleBorderColor #64748B
+skinparam databaseBorderColor #7C3AED
+skinparam wrapWidth 180
+title DFD 3 As-Is: оплата и бухгалтерия
+
+actor "Пациент" as patient
+actor "Кассир" as cash
+actor "Бухгалтерия" as acc
+rectangle "P1. Принять оплату\nи оформить чек" as sale #E2E8F0
+rectangle "P2. Дублировать\nоперацию вручную" as duplicate #E2E8F0
+rectangle "P3. Провести платеж\nи отчётность в 1С" as booking #E2E8F0
+database "D1. Excel: отдельный\nучёт оплат" as excel #FEF3C7
+database "D2. 1С:Бухгалтерия\nфайловый режим" as accounting #FEF3C7
+rectangle "ККМ\nTCP/IP + 1C OLE" as kkm #FEF3C7
+patient --> sale : Оплата услуги/данные для чека
+cash --> sale : Операция кассы
+sale --> kkm : Данные платежа
+kkm --> booking : Кассовая операция через OLE
+sale --> duplicate : Сведения о платеже и пациенте
+duplicate --> excel : Записать операцию повторно
+booking --> accounting : Учесть платёж
+acc --> booking : Проверить, скорректировать
+accounting --> booking : Данные оплаты и отчётности
+booking --> acc : Отчёты и реестры платежей
+kkm --> patient : Кассовый чек
+
+@enduml

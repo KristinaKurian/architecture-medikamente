@@ -1,0 +1,46 @@
+@startuml
+!pragma layout smetana
+left to right direction
+skinparam backgroundColor white
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam roundcorner 14
+skinparam ArrowColor #425466
+skinparam actorBorderColor #334155
+skinparam rectangleBorderColor #64748B
+skinparam databaseBorderColor #7C3AED
+skinparam wrapWidth 180
+title DFD 2 To-Be: медкарты и лаборатория
+
+actor "Пациент" as patient
+actor "Врач" as doctor
+rectangle "P1. Авторизовать по IAM\nи проверить контекст ABAC" as auth #DCFCE7
+rectangle "P2. Внести результаты\nлечения и анализов" as med #DBEAFE
+rectangle "P3. Выдать медданные\nв минимальном объёме" as read #DCFCE7
+rectangle "P4. Валидировать\nлабораторный API (будущее)" as labapi #DBEAFE
+database "D1. Реестр медданных\nи секретов (шифрование)" as db #EDE9FE
+database "D2. Объектное хранилище\nдокументов (шифрование)" as docs #EDE9FE
+database "D3. Журнал доступа\n+ подозрительные действия" as audit #EDE9FE
+rectangle "Лаборатория\n(планируемая интеграция)" as lab #FEF3C7
+patient --> med : Сведения о здоровье; TLS
+doctor --> auth : Учётная запись + patient_id\n+ лечение/назначение
+auth --> med : Разрешено редактировать
+med --> db : Медицинские сведения, теги
+med --> docs : Анализы/заключения; теги
+lab --> labapi : Подписанные результаты; TLS\nминимум идентификаторов
+labapi --> auth : Сервисная идентичность, цель
+auth --> labapi : Разрешение по сервисной политике
+labapi --> db : Валидировать и связать с пациентом
+doctor --> read : Запрос записи/заключения
+patient --> read : Запрос своего документа (будущий ЛК)
+read --> auth : ABAC: врач связан с лечением
+(действительный scope)
+db --> read : Только разрешённые поля
+docs --> read : Только разрешённый документ
+read --> doctor : Запрошенные медданные
+read --> patient : Только собственные данные / представитель
+read --> audit : Кто/что/когда/зачем
+med --> audit : Изменение, источник, версия
+labapi --> audit : Внешний доступ и lineage
+
+@enduml
