@@ -1,0 +1,30 @@
+@startuml
+!pragma layout smetana
+left to right direction
+skinparam backgroundColor white
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam roundcorner 14
+skinparam ArrowColor #425466
+skinparam actorBorderColor #334155
+skinparam rectangleBorderColor #64748B
+skinparam databaseBorderColor #7C3AED
+skinparam wrapWidth 180
+title DFD 4 As-Is: кадры и заработная плата
+
+actor "Сотрудник" as emp
+actor "Бухгалтерия" as acc
+rectangle "P1. Принять\nкадровые сведения" as receive #E2E8F0
+rectangle "P2. Вести кадровый\nучёт и начислять зарплату" as salary #E2E8F0
+rectangle "P3. Подготовить\nналоговую отчётность" as tax #E2E8F0
+database "D1. 1C:Бухгалтерия\nфайловый режим" as db #FEF3C7
+emp --> receive : Персональные данные\nи кадровые документы
+acc --> receive : Ввести сведения вручную
+receive --> salary : Кадровые сведения
+salary --> db : Сохранить ФИО, выплаты, налоги
+acc --> salary : Ввести начисления
+salary --> tax : Расчёт зарплаты и налогов
+db --> tax : Получить сведения для отчётов
+tax --> acc : Сформированные документы
+
+@enduml

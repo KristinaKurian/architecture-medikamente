@@ -1,0 +1,39 @@
+
+@startuml
+!pragma layout smetana
+left to right direction
+
+skinparam backgroundColor white
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam roundcorner 14
+skinparam ArrowColor #425466
+skinparam actorBorderColor #334155
+skinparam rectangleBorderColor #64748B
+skinparam databaseBorderColor #7C3AED
+skinparam wrapWidth 180
+
+title DFD 5 As-Is: складской учёт и закупки
+
+actor "Сотрудник склада" as staff
+actor "Бухгалтерия" as acc
+
+rectangle "P1. Учесть поступление,\nоборудование и ТМЦ" as item #E2E8F0
+
+rectangle "P2. Передать движения\nдля бухгалтерии" as sync #E2E8F0
+
+database "D1. 1С:Торговля и склад\nфайловый режим" as store #FEF3C7
+
+database "D2. 1С:Бухгалтерия\nфайловый режим" as accdb #FEF3C7
+
+staff --> item : Данные о ТМЦ и закупках
+
+item --> store : Записать позиции,\nостатки, документы
+
+store --> sync : Движения и стоимость
+
+sync --> accdb : Интеграция двух 1С
+
+accdb --> acc : Прочитать финансовые сведения
+
+@enduml

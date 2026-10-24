@@ -1,0 +1,39 @@
+@startuml
+!pragma layout smetana
+left to right direction
+skinparam backgroundColor white
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam roundcorner 14
+skinparam ArrowColor #425466
+skinparam actorBorderColor #334155
+skinparam rectangleBorderColor #64748B
+skinparam databaseBorderColor #7C3AED
+skinparam wrapWidth 180
+title DFD 1 To-Be: запись пациента и договоры
+
+actor "Пациент" as patient
+actor "Ресепшен" as rec
+actor "Медицинский\nспециалист" as doctor
+rectangle "P1. Принять заявку\n(портал/ресепшен)" as intake #DBEAFE
+rectangle "P2. Проверить доступ\nIAM + RBAC/ABAC" as auth #DCFCE7
+rectangle "P3. Записать пациента\nи сформировать договор" as book #DBEAFE
+rectangle "P4. Выдать минимум\nсведений о приёме" as view #DCFCE7
+database "D1. Реестр записей\nПДн; TLS + шифрование" as db #EDE9FE
+database "D2. Хранилище договоров\nшифрование + версии" as docs #EDE9FE
+database "D3. Журнал доступа\nбез содержимого ПДн" as audit #EDE9FE
+patient --> intake : Контакты и запрос на запись\nпо HTTPS
+rec --> intake : Внести запись в пределах роли
+intake --> auth : Субъект, роль, цель, контекст
+auth --> book : Разрешение + scope пациента
+book --> db : Сохранить минимум атрибутов
+book --> docs : Сохранить договор; тег PII
+rec --> view : Запрос списка на свою смену
+view --> auth : Проверка scope / филиала
+db --> view : Записи по разрешённому scope
+view --> rec : Время, врач, контакт; без диагнозов
+view --> doctor : Только собственное расписание
+book --> audit : Кто/когда/что изменил
+view --> audit : Кто/когда/какие данные читал
+
+@enduml

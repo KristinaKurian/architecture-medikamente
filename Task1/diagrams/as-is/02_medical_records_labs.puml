@@ -1,0 +1,44 @@
+
+@startuml
+!pragma layout smetana
+left to right direction
+
+skinparam backgroundColor white
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam roundcorner 14
+skinparam ArrowColor #425466
+skinparam actorBorderColor #334155
+skinparam rectangleBorderColor #64748B
+skinparam databaseBorderColor #7C3AED
+skinparam wrapWidth 180
+
+title DFD 2 As-Is: медкарты и результаты анализов
+
+actor "Пациент" as patient
+actor "Медицинский\nспециалист" as doctor
+
+rectangle "P1. Собрать анамнез\nи сведения о здоровье" as history #E2E8F0
+rectangle "P2. Сформировать карту,\nзаключение, учёт анализов" as med #E2E8F0
+rectangle "P3. Найти и прочитать\nмедицинские материалы" as read #E2E8F0
+
+database "D1. Общий диск:\nJPG/PDF сканы медкарт" as files #FEE2E2
+database "D2. Excel:\nучёт анализов" as sheets #FEE2E2
+
+patient --> history : Жалобы, болезни,\nанамнез и иные сведения
+
+history --> med : Результаты осмотра\nи анамнез
+
+doctor --> med : Внести диагноз,\nназначение, заключение
+
+med --> files : Сохранить/обновить PDF/JPG
+med --> sheets : Записать учёт анализа
+
+doctor --> read : Запросить историю пациента
+
+files --> read : Прочитать скан
+sheets --> read : Прочитать запись об анализе
+
+read --> doctor : Показать медицинские данные
+
+@enduml

@@ -1,0 +1,40 @@
+@startuml
+!pragma layout smetana
+left to right direction
+skinparam backgroundColor white
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam roundcorner 14
+skinparam ArrowColor #425466
+skinparam actorBorderColor #334155
+skinparam rectangleBorderColor #64748B
+skinparam databaseBorderColor #7C3AED
+skinparam wrapWidth 180
+title DFD 3 To-Be: оплата и бухгалтерия
+
+actor "Пациент" as patient
+actor "Кассир" as cash
+actor "Бухгалтерия" as acc
+rectangle "P1. Сформировать\nсчёт (без медданных)" as order #DBEAFE
+rectangle "P2. Проверить полномочия\nи роль кассира" as auth #DCFCE7
+rectangle "P3. Провести чек\nчерез защищённый адаптер" as payment #DBEAFE
+rectangle "P4. Передать платёж\nв 1C однократно" as sync #DCFCE7
+rectangle "Адаптер ККМ\nсегмент сети, allowlist" as kkm #DCFCE7
+database "D1. Список платежей\nминимум ПДн" as paydb #EDE9FE
+database "D2. 1С:Бухгалтерия\nроли, защита файлов" as accdb #EDE9FE
+database "D3. Аудит операций" as audit #EDE9FE
+patient --> order : Услуга, идентификатор заказа
+cash --> auth : Логин, MFA, роль, смена
+auth --> order : Доступ к заказу
+order --> payment : Сумма и order_id (без диагноза)
+payment --> kkm : Чек по выделенному каналу
+kkm --> patient : Кассовый чек
+payment --> sync : Итог, идентификатор операции
+sync --> paydb : Записать статус/idempotency key
+sync --> accdb : Передать один раз; доступ по роли
+acc --> auth : Запрос отчёта по роли
+accdb --> acc : Минимально нужные бух. данные
+sync --> audit : Изменения, пользователь, trace_id
+payment --> audit : Кассовая операция без ПДн в логах
+
+@enduml
